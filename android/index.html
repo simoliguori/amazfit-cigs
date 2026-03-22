@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a1a1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Sigarette</title>
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a1a;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    .page { display: none; min-height: 100vh; padding: 20px 16px; }
+    .page.active { display: block; }
+
+    /* Cigarette icon */
+    .cig-icon {
+      width: 120px; height: 12px; margin: 0 auto 8px;
+      background: #f5e6d0; border-radius: 6px; position: relative;
+    }
+    .cig-icon::before {
+      content: ''; position: absolute; left: 0; top: 0;
+      width: 26px; height: 12px; background: #d4954a; border-radius: 6px;
+    }
+
+    .subtitle { color: #888; font-size: 13px; text-align: center; margin-bottom: 6px; }
+    .quote { color: #ccaa77; font-size: 11px; text-align: center; margin-bottom: 12px; font-style: italic; }
+    .count { font-size: 72px; font-weight: 200; text-align: center; margin: 8px 0 16px; }
+
+    .btn {
+      display: block; width: 100%; padding: 18px; border: none;
+      border-radius: 16px; font-size: 20px; font-weight: 600;
+      cursor: pointer; text-align: center; margin-bottom: 12px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-accent { background: #ff6b35; color: #fff; }
+    .btn-accent:active { background: #e55a28; }
+    .btn-dim { background: #2a2a2a; color: #888; font-size: 14px; padding: 12px; }
+    .btn-dim:active { background: #333; }
+    .btn-small { display: inline-block; width: auto; padding: 10px 20px; }
+
+    .elapsed-label { color: #888; font-size: 12px; text-align: center; margin-top: 16px; }
+    .elapsed-value { color: #ff6b35; font-size: 15px; text-align: center; margin-top: 4px; }
+
+    .btn-row { display: flex; gap: 10px; margin-top: 16px; }
+    .btn-row .btn { flex: 1; }
+
+    /* History */
+    .history-title { color: #888; font-size: 14px; text-align: center; margin-bottom: 4px; }
+    .history-avg { color: #ff6b35; font-size: 13px; text-align: center; margin-bottom: 12px; }
+    .day-row {
+      display: flex; align-items: center; background: #2a2a2a;
+      border-radius: 10px; padding: 10px 14px; margin-bottom: 6px;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .day-row.today { background: #2a1a0a; }
+    .day-row:active { opacity: 0.8; }
+    .day-info { flex: 1; }
+    .day-name { font-size: 15px; font-weight: 600; }
+    .day-row.today .day-name { color: #ff6b35; }
+    .day-date { font-size: 11px; color: #888; margin-top: 2px; }
+    .day-avg { font-size: 10px; color: #ccaa77; margin-top: 2px; }
+    .day-bar-wrap { flex: 1; padding: 0 10px; }
+    .day-bar { height: 12px; border-radius: 4px; background: #774422; min-width: 0; }
+    .day-row.today .day-bar { background: #ff6b35; }
+    .day-count { font-size: 22px; font-weight: 600; min-width: 36px; text-align: right; }
+    .day-row.today .day-count { color: #ff6b35; }
+
+    /* Edit */
+    .edit-title { color: #888; font-size: 14px; text-align: center; margin-bottom: 4px; }
+    .edit-date { color: #ff6b35; font-size: 18px; text-align: center; margin-bottom: 16px; }
+    .edit-count { font-size: 72px; font-weight: 200; text-align: center; margin: 16px 0; }
+    .edit-btns { display: flex; gap: 12px; justify-content: center; }
+    .edit-btn {
+      width: 72px; height: 60px; border: none; border-radius: 16px;
+      font-size: 32px; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; -webkit-tap-highlight-color: transparent;
+    }
+    .edit-btn.minus { background: #2a2a2a; color: #fff; }
+    .edit-btn.plus { background: #ff6b35; color: #fff; }
+    .edit-btn:active { opacity: 0.8; }
+
+    /* Settings */
+    .setting-label { color: #888; font-size: 12px; margin-bottom: 6px; }
+    .lang-btns { display: flex; gap: 10px; margin-bottom: 20px; }
+    .lang-btn {
+      flex: 1; padding: 10px; border: none; border-radius: 10px;
+      font-size: 13px; cursor: pointer; text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .lang-btn.active { background: #ff6b35; color: #fff; }
+    .lang-btn.inactive { background: #2a2a2a; color: #888; }
+    .lang-btn:active { opacity: 0.8; }
+    .hour-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .hour-btn {
+      width: 44px; height: 40px; border: none; border-radius: 10px;
+      background: #2a2a2a; color: #fff; font-size: 22px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hour-btn:active { background: #333; }
+    .hour-display { flex: 1; text-align: center; font-size: 28px; }
+    .divider { height: 1px; background: #2a2a2a; margin: 16px 0; }
+    .credits-label { color: #888; font-size: 11px; text-align: center; }
+    .credits-link { color: #ff6b35; font-size: 14px; text-align: center; margin-top: 4px; }
+
+    /* Sync indicator */
+    .sync-status {
+      position: fixed; top: 8px; right: 8px; font-size: 10px;
+      color: #555; padding: 4px 8px; border-radius: 8px; background: #222;
+    }
+    .sync-status.synced { color: #4a4; }
+    .sync-status.syncing { color: #ff6b35; }
+  </style>
+</head>
+<body>
+  <div class="sync-status" id="syncStatus">offline</div>
+
+  <!-- HOME PAGE -->
+  <div class="page active" id="page-home">
+    <div class="cig-icon"></div>
+    <div class="subtitle" id="homeSubtitle">CIGARETTES TODAY</div>
+    <div class="quote" id="homeQuote"></div>
+    <div class="count" id="homeCount">0</div>
+    <button class="btn btn-accent" id="btnAdd">+ cigarette</button>
+    <div class="elapsed-label" id="elapsedLabel">last cigarette</div>
+    <div class="elapsed-value" id="elapsedValue">none today</div>
+    <button class="btn btn-dim" id="btnCorrect" style="margin-top:16px">- correct</button>
+    <div class="btn-row">
+      <button class="btn btn-dim btn-small" id="btnHistory">history</button>
+      <button class="btn btn-dim btn-small" id="btnSettings">settings</button>
+    </div>
+  </div>
+
+  <!-- HISTORY PAGE -->
+  <div class="page" id="page-history">
+    <div class="history-title" id="histTitle">14-DAY HISTORY</div>
+    <div class="history-avg" id="histAvg"></div>
+    <div id="histDays"></div>
+    <button class="btn btn-dim" id="btnHistBack" style="margin-top:12px">back</button>
+  </div>
+
+  <!-- EDIT PAGE -->
+  <div class="page" id="page-edit">
+    <div class="edit-title" id="editTitle">EDIT DAY</div>
+    <div class="edit-date" id="editDate"></div>
+    <div class="edit-count" id="editCount">0</div>
+    <div class="edit-btns">
+      <button class="edit-btn minus" id="btnEditMinus">-</button>
+      <button class="edit-btn plus" id="btnEditPlus">+</button>
+    </div>
+    <button class="btn btn-dim" id="btnEditBack" style="margin-top:20px">back</button>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div class="page" id="page-settings">
+    <div class="subtitle" id="settTitle" style="margin-bottom:16px">SETTINGS</div>
+    <div class="setting-label" id="settLangLabel">LANGUAGE</div>
+    <div class="lang-btns">
+      <button class="lang-btn" id="btnLangEn">English</button>
+      <button class="lang-btn" id="btnLangIt">Italiano</button>
+    </div>
+    <div class="setting-label" id="settEndLabel">END DAY AT</div>
+    <div class="hour-row">
+      <button class="hour-btn" id="btnHourMinus">-</button>
+      <div class="hour-display" id="hourDisplay">04:00</div>
+      <button class="hour-btn" id="btnHourPlus">+</button>
+    </div>
+    <div class="divider"></div>
+    <div class="credits-label" id="settCreditsLabel">CREDITS</div>
+    <div class="credits-link">eccerobot.xyz</div>
+    <button class="btn btn-dim" id="btnSettBack" style="margin-top:20px">back</button>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
